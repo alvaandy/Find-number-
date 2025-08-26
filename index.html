@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>找數字遊戲</title>
+<style>
+  body { 
+    font-family: "Microsoft JhengHei", sans-serif; 
+    text-align: center; 
+    background-color: #f2f2f2; 
+  }
+  h1 { color: #333; }
+  table { 
+    margin: auto; 
+    border-collapse: collapse; 
+  }
+  td { 
+    border: 1px solid #ccc; 
+    padding: 10px; 
+    font-size: 20px; 
+    width: 45px; 
+    height: 45px; 
+    cursor: pointer; 
+    background-color: white;
+    transition: background-color 0.3s;
+  }
+  td:hover { background-color: #e6f7ff; }
+  .target { 
+    font-weight: bold; 
+    color: #d63333; 
+    font-size: 22px; 
+  }
+  .scoreboard { 
+    font-size: 18px; 
+    margin: 10px 0; 
+  }
+  #timer {
+    font-size: 18px;
+    color: #ff6600;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎯 找數字遊戲</h1>
+<p class="scoreboard">第 <span id="round">0</span> / <span id="total-rounds">5</span> 題 | 分數：<span id="score">0</span></p>
+<p id="target" class="target"></p>
+<p id="timer"></p>
+<div id="board"></div>
+<p id="result" style="font-size:20px; font-weight:bold;"></p>
+
+<script>
+let numbers = [...Array(50).keys()].map(x => x + 1);
+let score = 0;
+let rounds = 10;
+let currentRound = 0;
+let target;
+let timeLimit = 15;
+let timer;
+
+document.getElementById("total-rounds").innerText = rounds;
+
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startRound() {
+    if (currentRound >= rounds) {
+        document.getElementById("result").innerText = `🏁 遊戲結束！你得了 ${score} 分`;
+        document.getElementById("board").innerHTML = "";
+        document.getElementById("target").innerText = "";
+        document.getElementById("timer").innerText = "";
+        return;
+    }
+    currentRound++;
+    document.getElementById("round").innerText = currentRound;
+
+    let shuffled = shuffle([...numbers]);
+    target = Math.floor(Math.random() * 50) + 1;
+    document.getElementById("target").innerText = `請找出數字：${target}`;
+
+    let html = "<table>";
+    for (let i = 0; i < 50; i++) {
+        if (i % 10 === 0) html += "<tr>";
+        html += `<td onclick="checkNumber(${shuffled[i]})">${shuffled[i]}</td>`;
+        if (i % 10 === 9) html += "</tr>";
+    }
+    html += "</table>";
+    document.getElementById("board").innerHTML = html;
+
+    let timeLeft = timeLimit;
+    document.getElementById("timer").innerText = `剩餘時間：${timeLeft} 秒`;
+    clearInterval(timer);
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = `剩餘時間：${timeLeft} 秒`;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("⏰ 超時！");
+            startRound();
+        }
+    }, 1000);
+}
+
+function checkNumber(num) {
+    clearInterval(timer);
+    if (num === target) {
+        score++;
+        document.getElementById("score").innerText = score;
+        alert("✅ 答對了！");
+    } else {
+        alert(`❌ 錯了！正確答案是 ${target}`);
+    }
+    startRound();
+}
+
+startRound();
+</script>
+
+</body>
+</html>
+
